@@ -94,3 +94,17 @@
       "r" #'+default/search-project-for-symbol-at-point
       "n" #'tide-rename-symbol)
 
+
+  (unless (display-graphic-p)
+          (require 'evil-terminal-cursor-changer)
+          (evil-terminal-cursor-changer-activate)) 
+
+          (setq evil-motion-state-cursor 'box)  ; █
+          (setq evil-visual-state-cursor 'box)  ; █
+          (setq evil-normal-state-cursor 'box)  ; █
+          (setq evil-insert-state-cursor 'box)  ; ⎸
+          (setq evil-emacs-state-cursor  'box) ; _
+
+(setq evil-normal-state-cursor '(box "#FE4066")
+      evil-insert-state-cursor '(box "#FFCF1F")
+      evil-visual-state-cursor '(box "#BC44FF"))

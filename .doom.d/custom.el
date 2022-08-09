@@ -18,10 +18,12 @@
  '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
  '(objed-cursor-color "#ff5555")
- '(package-selected-packages '(react-snippets wgrep-pt wgrep-ag wgrep lsp-mode))
+ '(package-selected-packages
+   '(evil-terminal-cursor-changer markdown-preview-mode vim-region react-snippets wgrep-pt wgrep-ag wgrep lsp-mode))
  '(pdf-view-midnight-colors (cons "#f8f8f2" "#282a36"))
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
+ '(safe-local-variable-values '((t . w)))
  '(vc-annotate-background "#282a36")
  '(vc-annotate-color-map
    (list

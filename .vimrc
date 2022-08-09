@@ -12,7 +12,10 @@ set foldmethod=syntax
 
 let g:go_debug=['shell-commands'] 
 let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
-nmap ss <Plug>(easymotion-s2)
+
+nmap <Leader>ss <Plug>(easymotion-s2)
+
+nmap <Leader>b :Buffers<CR>
 
 let g:far#enable_undo=1
 
@@ -25,8 +28,8 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gr <Plug>(coc-references)
 nmap <Leader>rn <Plug>(coc-rename)
 
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> [e <Plug>(coc-diagnostic-prev)
+nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
 "search fzf
 nmap <Leader><Leader> :LeaderfFile<CR>
@@ -85,7 +88,8 @@ cnoremap <c-n> <CR>n/<c-p>
 " Prettier file
 nmap <Leader>l :call CocAction('format')<CR>
 
-nmap <Leader> :w<CR>
+nmap <Leader>bs :w<CR>
+nmap <Leader>bS :wa<CR>
 
 map <Leader>s <Plug>(easymotion-prefix)
 
@@ -692,3 +696,10 @@ require'marks'.setup {
 
 EOF
 
+
+highlight Cursor guifg=red guibg=red
+
+set guicursor=n-v-c:block-Cursor
+set guicursor+=i:block-Cursor
+set guicursor+=n-v-c:block-Cursor
+set guicursor+=i:block-Cursor
