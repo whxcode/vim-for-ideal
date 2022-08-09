@@ -3,7 +3,6 @@
 set shell=zsh
 let mapleader = " "  " map leader键设置 
 let g:mapleader = " " 
-
 set cursorline
 set showmatch
 
@@ -37,8 +36,9 @@ nmap <Leader>b :Buffers<CR>
 nmap <Leader>r :Rg<CR>
 nnoremap <silent> <Leader>rr :Rg <C-R><C-W><CR>
 nmap <Leader>h :History<CR>
-nmap <Leader>gc :Commits<CR>
-nmap <Leader>gb :BCommits<CR>
+nmap <Leader>gc :Telescope git_commits<CR>
+nmap <Leader>gb :Telescope git_bcommits<CR>
+nmap <Leader>' :Telescope registers<CR>
 nmap <Leader>ww :Windows<CR>
 let g:fzf_action = { 'alt-e': 'edit' }
 
@@ -308,6 +308,8 @@ Plugin 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plugin 'gelguy/wilder.nvim', { 'do': function('UpdateRemotePlugins') }
 Plugin 'gennaro-tedesco/nvim-peekup'
 Plugin 'chentoast/marks.nvim'
+Plugin 'nvim-telescope/telescope.nvim',
+Plugin 'nvim-telescope/telescope-file-browser.nvim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -697,6 +699,9 @@ require'marks'.setup {
 EOF
 
 
+
+set termguicolors 
+TERM=xterm-256color
 highlight Cursor guifg=red guibg=red
 
 set guicursor=n-v-c:block-Cursor
