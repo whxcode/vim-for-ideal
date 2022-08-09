@@ -1,5 +1,3 @@
- "let loaded_matchparen = 1
-"
 set shell=zsh
 let mapleader = " "  " map leader键设置 
 let g:mapleader = " " 
@@ -661,6 +659,10 @@ call wilder#set_option('renderer', wilder#popupmenu_renderer(wilder#popupmenu_bo
 
 
 lua require('nvim-peekup.config').on_keystroke["paste_reg"] = '+'
+lua require('nvim-peekup.config').on_keystroke["delay"] = '1ms'
+let g:peekup_paste_before = '<leader>q'
+let g:peekup_paste_after = '<leader>p'
+lua require('nvim-peekup.config').on_keystroke["autoclose"] = true 
 
 
 lua <<EOF
@@ -708,3 +710,8 @@ set guicursor=n-v-c:block-Cursor
 set guicursor+=i:block-Cursor
 set guicursor+=n-v-c:block-Cursor
 set guicursor+=i:block-Cursor
+
+map <leader>tn :tabnew<cr>
+map <leader>t<leader> :tabnext<cr>
+map <leader>tc :tabclose<cr>
+map <leader>to :tabonly<cr>
