@@ -34,8 +34,8 @@ nmap <Leader>b :Buffers<CR>
 nmap <Leader>r :Rg<CR>
 nnoremap <silent> <Leader>rr :Rg <C-R><C-W><CR>
 nmap <Leader>h :History<CR>
-nmap <Leader>gc :Telescope git_commits<CR>
-nmap <Leader>gb :Telescope git_bcommits<CR>
+nmap <Leader>gc :Commits<CR>
+nmap <Leader>gb :BCommits<CR>
 nmap <Leader>' :Telescope registers<CR>
 nmap <Leader>ww :Windows<CR>
 let g:fzf_action = { 'alt-e': 'edit' }
@@ -657,12 +657,13 @@ call wilder#set_option('renderer', wilder#popupmenu_renderer(wilder#popupmenu_bo
       \ })))
 
 
-
 lua require('nvim-peekup.config').on_keystroke["paste_reg"] = '+'
-lua require('nvim-peekup.config').on_keystroke["delay"] = '1ms'
+lua require('nvim-peekup.config').on_keystroke["delay"] = ''
+lua require('nvim-peekup.config').on_keystroke["autoclose"] = true 
+
+
 let g:peekup_paste_before = '<leader>q'
 let g:peekup_paste_after = '<leader>p'
-lua require('nvim-peekup.config').on_keystroke["autoclose"] = true 
 
 
 lua <<EOF
