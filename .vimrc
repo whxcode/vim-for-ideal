@@ -105,11 +105,14 @@ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 " 显示当前行的提交记录
 " call Git 
 nnoremap <Leader>g :<C-u>call gitblame#echo()<CR> 
-noremap <Leader>gp :G push<CR>
-noremap <Leader>gl :G pull<CR>
+"noremap <Leader>gp :G push<CR>
+"noremap <Leader>gl :G pull<CR>
 noremap <Leader>gg :G<CR>
 noremap <Leader>gczw :G stash save<CR>
 noremap <Leader>gczp :G stash pop<CR>
+
+nmap pu :G push<CR>
+nmap fu :G pull<CR>
 
 " window key
 noremap <Leader>wv <C-w>v

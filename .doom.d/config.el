@@ -108,3 +108,5 @@
 (setq evil-normal-state-cursor '(box "#FE4066")
       evil-insert-state-cursor '(box "#FFCF1F")
       evil-visual-state-cursor '(box "#BC44FF"))
+
+(require 'which-key)
