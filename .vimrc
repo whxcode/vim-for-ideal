@@ -108,7 +108,7 @@ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 nnoremap <Leader>g :<C-u>call gitblame#echo()<CR> 
 noremap <Leader>pu :G push<CR>
 noremap <Leader>fu :G pull<CR>
-noremap <Leader>gg :G<CR>
+noremap <Leader>gg :Neogit<CR>
 noremap <Leader>gczw :G stash save<CR>
 noremap <Leader>gczp :G stash pop<CR>
 
@@ -724,21 +724,8 @@ local neogit = require('neogit')
 
 neogit.setup {
  integrations = {
-    -- Neogit only provides inline diffs. If you want a more traditional way to look at diffs, you can use `sindrets/diffview.nvim`.
-    -- The diffview integration enables the diff popup, which is a wrapper around `sindrets/diffview.nvim`.
-    --
-    -- Requires you to have `sindrets/diffview.nvim` installed.
-    -- use { 
-    --   'TimUntersberger/neogit', 
-    --   requires = { 
-    --     'nvim-lua/plenary.nvim',
-    --     'sindrets/diffview.nvim' 
-    --   }
-    -- }
-    --
     diffview = true  
   },
-
   }
 
 local actions = require("diffview.actions")
@@ -749,12 +736,12 @@ require("diffview").setup({
   git_cmd = { "git" },      -- The git executable followed by default args.
   use_icons = true,         -- Requires nvim-web-devicons
   icons = {                 -- Only applies when use_icons is true.
-    folder_closed = "",
-    folder_open = "",
+    folder_closed = "c",
+    folder_open = "o",
   },
   signs = {
-    fold_closed = "",
-    fold_open = "",
+    fold_closed = "c",
+    fold_open = "o",
   },
   file_panel = {
     listing_style = "tree",             -- One of 'list' or 'tree'
