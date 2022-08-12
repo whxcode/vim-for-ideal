@@ -29,7 +29,7 @@ nmap <silent> [e <Plug>(coc-diagnostic-prev)
 nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
 "search fzf
-nmap <Leader><Leader> :LeaderfFile<CR>
+nmap <Leader><Leader> :Files<CR>
 nmap <Leader>b :Buffers<CR>
 nmap <Leader>r :Rg<CR>
 nnoremap <silent> <Leader>rr :Rg <C-R><C-W><CR>
@@ -309,6 +309,8 @@ Plugin 'gennaro-tedesco/nvim-peekup'
 Plugin 'chentoast/marks.nvim'
 Plugin 'nvim-telescope/telescope.nvim',
 Plugin 'nvim-telescope/telescope-file-browser.nvim'
+Plugin 'Pocco81/auto-save.nvim'
+Plugin 'TimUntersberger/neogit'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -702,6 +704,25 @@ require'marks'.setup {
 
 EOF
 
+lua << EOF
+	require("auto-save").setup {
+   execution_message = {
+		message = function() -- message to print on save
+			return ('')
+		end,
+		dim = 0.18, -- dim the color of `message`
+		cleaning_interval = 0, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
+	},
+	}
+
+EOF
+
+lua << EOF
+local neogit = require('neogit')
+
+neogit.setup {}
+EOF
+
 
 
 set termguicolors 
@@ -717,3 +738,4 @@ map <leader>tn :tabnew<cr>
 map <leader>t<leader> :tabnext<cr>
 map <leader>tc :tabclose<cr>
 map <leader>to :tabonly<cr>
+
