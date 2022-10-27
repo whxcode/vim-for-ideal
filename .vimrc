@@ -34,6 +34,8 @@ nmap <leader>rf <Plug>(coc-refactor)
 " Prettier file
 nmap <Leader>l :Prettier<CR>
 
+nmap <Leader>; :vsp <bar> :terminal<CR>
+
 nmap <silent> [e <Plug>(coc-diagnostic-prev)
 nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
@@ -129,9 +131,8 @@ noremap <Leader>wk <C-w>k
 noremap <Leader>wx <C-w>x
 noremap <Leader>wr <C-w>r
 noremap <Leader>wq <C-w>q
-nmap <silent> q :q!<CR>
+nmap <silent> qq :q!<CR>
 
-noremap <Leader>t :terminal<CR>
 
 nnoremap <leader>n <cmd>lua require('memento').toggle()<CR>
 
