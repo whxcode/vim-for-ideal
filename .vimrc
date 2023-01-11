@@ -1,3 +1,4 @@
+set number
 set shell=zsh
 let mapleader = " "  " map leader键设置 
 let g:mapleader = " " 
@@ -9,9 +10,6 @@ tnoremap <Esc> <C-\><C-n>
 autocmd TermOpen * setlocal nonumber norelativenumber
 set diffopt=internal,filler,closeoff,vertical
 
-set foldlevelstart=99
-set foldmethod=syntax
-
 let g:go_debug=['shell-commands'] 
 let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 
@@ -20,6 +18,9 @@ nmap <Leader>ss <Plug>(easymotion-s2)
 nmap <Leader>b :Buffers<CR>
 
 let g:far#enable_undo=1
+
+nnoremap <C-k> <Up>ddp<Up>
+nnoremap <C-j> ddp
 
 command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
 "使用 coc.nvim 插件。 
@@ -33,8 +34,6 @@ nmap <Leader>rn <Plug>(coc-rename)
 nmap <leader>rf <Plug>(coc-refactor)
 " Prettier file
 nmap <Leader>l :Prettier<CR>
-
-nmap <Leader>; :vsp <bar> :terminal<CR>
 
 nmap <silent> [e <Plug>(coc-diagnostic-prev)
 nmap <silent> ]e <Plug>(coc-diagnostic-next)
@@ -51,47 +50,6 @@ nmap <Leader>' :Telescope registers<CR>
 nmap <Leader>ww :Windows<CR>
 let g:fzf_action = { 'alt-e': 'edit' }
 
-" don't show the help in normal mode
-let g:Lf_HideHelp = 1
-let g:Lf_UseCache = 0
-let g:Lf_UseVersionControlTool = 0
-let g:Lf_IgnoreCurrentBufferName = 1
-" popup mode
-let g:Lf_WindowPosition = 'popup'
-let g:Lf_PreviewInPopup = 1
-let g:Lf_RgHighlightInPreview  = 1
-let g:Lf_PopupShowBorder = 1
-let g:Lf_PreviewHorizontalPosition  = 'right'
-let g:Lf_PopupPreviewPosition  ='right'
-let g:Lf_PopupColorscheme = 'powerline'
-let g:Lf_ShowDevIcons = 0
-let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
-    let g:Lf_PreviewResult = {
-            \ 'File': 1,
-            \ 'Buffer': 1,
-            \ 'Mru': 1,
-            \ 'Tag': 1,
-            \ 'BufTag': 1,
-            \ 'Function': 1,
-            \ 'Line': 1,
-            \ 'Colorscheme': 1,
-            \ 'Rg': 1,
-            \ 'Gtags': 1
-            \}
-
-
-let g:Lf_ShortcutF = "<leader>ff"
-noremap <leader>qb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
-noremap <leader>qfm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
-noremap <leader>qft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
-noremap <leader>qfl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
-
-noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
-noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
-" search visually selected text literally
-xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<CR>
-noremap go :<C-U>Leaderf! rg --recall<CR>
-
 set incsearch
 cnoremap <c-n> <CR>n/<c-p>
 
@@ -107,9 +65,6 @@ nnoremap <leader>sw <cmd>lua require('spectre').open_visual({select_word=true})<
 vnoremap <leader>s <esc>:lua require('spectre').open_visual()<CR>
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
-" run command :Spectre
-
-"nmap <Leader>s :terminal<CR>
 
 " 显示当前行的提交记录
 " call Git 
@@ -119,7 +74,6 @@ noremap <Leader>fu :G pull<CR>
 noremap <Leader>gg :G<CR>
 noremap <Leader>gczw :G stash save<CR>
 noremap <Leader>gczp :G stash pop<CR>
-
 
 " window key
 noremap <Leader>wv <C-w>v
@@ -234,18 +188,14 @@ endfunc" set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-"Plugin 'lambdalisue/vim-foldround'
-"Plugin 'lambdalisue/battery.vim'
-Plugin 'dracula/vim', { 'name': 'dracula' }
+Plugin 'Mofiqul/dracula.nvim'
 Plugin 'scrooloose/nerdtree'
 Plugin 'scrooloose/syntastic'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'eslint/eslint'
-"Plugin 'Valloric/YouCompleteMe'
 Plugin 'rking/ag.vim'
 Plugin 'djoshea/vim-autoread'
 Plugin 'Chiel92/vim-autoformat'
-"Plugin 'brglng/vim-im-select'
 Plugin 'prettier/vim-prettier', {
   \ 'do': 'yarn install',
   \ 'branch': 'release/1.x',
@@ -264,16 +214,11 @@ Plugin 'wincent/ferret'
 Plugin 'rlue/vim-barbaric'
 Plugin 'sbdchd/neoformat'
 Plugin 'ronakg/quickr-cscope.vim'
-
 Plugin 'pangloss/vim-javascript'
 Plugin 'leafgarland/typescript-vim'
 Plugin 'peitalin/vim-jsx-typescript'
 Plugin 'styled-components/vim-styled-components', { 'branch': 'main' }
-"Plugin 'jparise/vim-graphql'
-"Plugin 'morhetz/gruvbox'
 Plugin 'neoclide/coc.nvim', {'branch': 'release'}
-"Plugin 'neoclide/coc-tabnine.vim'
-"
 Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'HerringtonDarkholme/yats.vim'
@@ -281,17 +226,13 @@ Plugin 'airblade/vim-gitgutter'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'tpope/vim-fugitive'
-"Plugin 'tomasr/molokai'
 Plugin 'tpope/vim-haml'
-"Plugin 'https://github.com/shmargum/vim-sass-colors.git'
 Plugin 'JulesWang/css.vim'
 Plugin 'cakebaker/scss-syntax.vim'
 Plugin 'numkil/ag.nvim'
 Plugin 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plugin 'junegunn/fzf.vim'
 Plugin 'zivyangll/git-blame.vim'
-"Plugin 'dhruvasagar/vim-table-mode'
-"Plugin 'godlygeek/tabular'
 Plugin 'mzlogin/vim-markdown-toc'
 Plugin 'plasticboy/vim-markdown'
 Plugin 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
@@ -303,25 +244,21 @@ Plugin 'tpope/vim-surround'
 Plugin 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plugin 'easymotion/vim-easymotion'
 Plugin 'maksimr/vim-jsbeautify'
-"Plugin 'brooth/far.vim'
-Plugin 'jreybert/vimagit'
 Plugin 'voldikss/vim-floaterm'
 Plugin 'dinhhuy258/git.nvim'
 Plugin 'neoclide/jsonc.vim'
 Plugin 'nvim-lua/plenary.nvim'
 Plugin 'windwp/nvim-spectre'
 Plugin 'terryma/vim-multiple-cursors'
-"Plugin 'puremourning/vimspector'
-Plugin 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
 Plugin 'gelguy/wilder.nvim', { 'do': function('UpdateRemotePlugins') }
 Plugin 'gennaro-tedesco/nvim-peekup'
 Plugin 'chentoast/marks.nvim'
 Plugin 'nvim-telescope/telescope.nvim',
 Plugin 'nvim-telescope/telescope-file-browser.nvim'
-Plugin 'Pocco81/auto-save.nvim'
-"Plugin 'TimUntersberger/neogit'
-"Plugin 'sindrets/diffview.nvim'
-#Plugin 's1n7ax/nvim-terminal',
+Plugin 's1n7ax/nvim-terminal'
+Plugin 'brglng/vim-im-select'
+
+
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -410,11 +347,7 @@ set magic
 " How many tenths of a second to blink when matching brackets
 set mat=2
 
-if (has("termguicolors"))
-  set termguicolors
-endif
-set background=dark
-colorscheme dracula
+
 
 " Set utf8 as standard encoding and en_US as the standard language
 set fileencodings=utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1
@@ -715,23 +648,64 @@ require'marks'.setup {
 
 EOF
 
-lua << EOF
-	require("auto-save").setup {
-   execution_message = {
-		message = function() -- message to print on save
-			return ('')
-		end,
-		dim = 0.18, -- dim the color of `message`
-		cleaning_interval = 0, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
-	},
-	}
 
+lua << EOF
+-- following option will hide the buffer when it is closed instead of deleting
+-- the buffer. This is important to reuse the last terminal buffer
+-- IF the option is not set, plugin will open a new terminal every single time
+vim.o.hidden = true
+
+require('nvim-terminal').setup({
+    window = {
+        -- Do `:h :botright` for more information
+        -- NOTE: width or height may not be applied in some "pos"
+        position = 'botright',
+
+        -- Do `:h split` for more information
+        split = 'vsp',
+
+        -- Width of the terminal
+        width = 50,
+
+        -- Height of the terminal
+        height = 100,
+    },
+
+    -- keymap to disable all the default keymaps
+    disable_default_keymaps = false,
+
+    -- keymap to toggle open and close terminal window
+    toggle_keymap = '<leader>;',
+
+    -- increase the window height by when you hit the keymap
+    window_height_change_amount = 2,
+
+    -- increase the window width by when you hit the keymap
+    window_width_change_amount = 2,
+
+    -- keymap to increase the window width
+    increase_width_keymap = '<leader><leader>+',
+
+    -- keymap to decrease the window width
+    decrease_width_keymap = '<leader><leader>-',
+
+    -- keymap to increase the window height
+    increase_height_keymap = '<leader>+',
+
+    -- keymap to decrease the window height
+    decrease_height_keymap = '<leader>-',
+
+    terminals = {
+        -- keymaps to open nth terminal
+        {keymap = '<leader>1'},
+        {keymap = '<leader>2'},
+        {keymap = '<leader>3'},
+        {keymap = '<leader>4'},
+        {keymap = '<leader>5'},
+    },
+})
 EOF
 
-
-set termguicolors 
-TERM=xterm-256color
-highlight Cursor guifg=red guibg=red
 
 set guicursor=n-v-c:block-Cursor
 set guicursor+=i:block-Cursor
@@ -741,4 +715,9 @@ set guicursor+=i:block-Cursor
 map <leader>tn :tabnew<cr>
 map <leader>t<leader> :tabnext<cr>
 map <leader>tc :tabclose<cr>
-map <leader>to :tabonly<cr>
+map <leader>to :tabonly<cr>r
+
+set background=dark
+colorscheme dracula
+
+inoremap <silent><expr> <cr> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
