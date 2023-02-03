@@ -5,7 +5,17 @@ let g:mapleader = " "
 set cursorline
 set showmatch
 
+
 tnoremap <Esc> <C-\><C-n>
+
+autocmd FileType scss setl iskeyword+=@-@
+autocmd FileType scss setl iskeyword+=@
+autocmd FileType scss setl iskeyword+=$
+autocmd FileType scss setl iskeyword+=-
+
+autocmd FileType css setl iskeyword+=@
+autocmd FileType css setl iskeyword+=$
+autocmd FileType css setl iskeyword+=-
 
 autocmd TermOpen * setlocal nonumber norelativenumber
 set diffopt=internal,filler,closeoff,vertical
@@ -16,6 +26,8 @@ let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 nmap <Leader>ss <Plug>(easymotion-s2)
 
 nmap <Leader>b :Buffers<CR>
+
+
 
 let g:far#enable_undo=1
 
@@ -38,12 +50,29 @@ nmap <Leader>l :Prettier<CR>
 nmap <silent> [e <Plug>(coc-diagnostic-prev)
 nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
+nmap <silent> <C-s> <Plug>(coc-range-select)
+xmap <silent> <C-s> <Plug>(coc-range-select)
+
+
 "search fzf
-nmap <Leader><Leader> :Files<CR>
-nmap <Leader>b :Buffers<CR>
-nmap <Leader>r :Rg<CR>
-nnoremap <silent> <Leader>rr :Rg <C-R><C-W><CR>
-nmap <Leader>h :History<CR>
+nmap <Leader><Leader> <cmd>lua require('fzf-lua').files()<CR>
+nmap <Leader>b <cmd>lua require('fzf-lua').buffers()<CR>
+nmap <Leader>fg <cmd>lua require('fzf-lua').git_status()<CR>
+nmap <Leader>fb <cmd>lua require('fzf-lua').git_branches()<CR>
+nmap <Leader>fs <cmd>lua require('fzf-lua').git_stash()<CR>
+nmap <Leader>fm :Marks<CR>
+nmap <Leader>r <cmd>lua require('fzf-lua').grep()<CR><CR>
+nmap <Leader>rr <cmd>lua require('fzf-lua').grep_cword()<CR><CR>
+nmap <Leader>rc <cmd>lua require('fzf-lua').lgrep_curbuf()<CR><CR>
+nmap <Leader>h <cmd>lua require('fzf-lua').oldfiles()<CR>
+nmap <Leader>fh <cmd>lua require('fzf-lua').search_history()<CR>
+nmap <Leader>fc <cmd>lua require('fzf-lua').command_history()<CR>
+nmap <Leader>fj <cmd>lua require('fzf-lua').jumps()<CR>
+
+nmap <Leader>to <cmd>lua require('fzf-lua').grep()<CR>// TODO<CR>
+nmap <Leader>fi <cmd>lua require('fzf-lua').grep()<CR>// FIXME<CR>
+nmap <Leader>ha <cmd>lua require('fzf-lua').grep()<CR>// HACK<CR>
+
 nmap <Leader>gc :Commits<CR>
 nmap <Leader>gb :BCommits<CR>
 nmap <Leader>' :Telescope registers<CR>
@@ -102,7 +131,7 @@ noremap * *:set hlsearch<cr>
 
 
 "check spell
-nmap <leader>m <Plug>(coc-codeaction-selected)
+nmap <leader>m <Plug>(coc-codeaction-selected)<CR>
 
 "save
 "autocmd BufNewFile *.cpp,*.[ch],*.sh,*.rb,*.java,*.py,*.tsx exec ":call SetTitle()"
@@ -257,6 +286,18 @@ Plugin 'nvim-telescope/telescope.nvim',
 Plugin 'nvim-telescope/telescope-file-browser.nvim'
 Plugin 's1n7ax/nvim-terminal'
 Plugin 'brglng/vim-im-select'
+Plugin 'akinsho/git-conflict.nvim'
+Plugin 'https://github.com/adelarsq/image_preview.nvim'
+Plugin 'numToStr/Comment.nvim'
+Plugin 'ibhagwan/fzf-lua', {'branch': 'main'}
+Plugin 'gennaro-tedesco/nvim-possession'
+Plugin 'tpope/vim-abolish'
+Plugin 'antoinemadec/coc-fzf'
+
+"Plugin 'anuvyklack/pretty-fold.nvim'
+Plugin 'kevinhwang91/promise-async'
+Plugin 'kevinhwang91/nvim-ufo'
+Plugin  'luukvbaal/statuscol.nvim',
 
 
 
@@ -554,11 +595,11 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 " Mappings for CoCList
 " Show all diagnostics.
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
-"nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+nnoremap <silent><nowait> <space>e  :<C-u>CocFzfList diagnostics<cr>
+nnoremap <silent><nowait> <space>a  :<C-u>CocFzfList actions<cr>
+nnoremap <silent><nowait> <space>c  :<C-u>CocFzfList commands<CR>
 nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
 nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
-nnoremap <silent><nowait> <space>c  :<C-u>CocCommand<CR>
 
 nnoremap   <silent>   ,o    :FloatermNew --cwd=<buffer><CR>
 
@@ -608,9 +649,10 @@ lua require('nvim-peekup.config').on_keystroke["paste_reg"] = '+'
 lua require('nvim-peekup.config').on_keystroke["delay"] = ''
 lua require('nvim-peekup.config').on_keystroke["autoclose"] = true 
 
-
 let g:peekup_paste_before = '<leader>q'
 let g:peekup_paste_after = '<leader>pp'
+
+let g:peekup_empty_registers = 'p][]'
 
 
 lua <<EOF
@@ -707,6 +749,11 @@ require('nvim-terminal').setup({
 EOF
 
 
+lua << EOF
+  require('git-conflict').setup()
+EOF
+
+
 set guicursor=n-v-c:block-Cursor
 set guicursor+=i:block-Cursor
 set guicursor+=n-v-c:block-Cursor
@@ -721,3 +768,105 @@ set background=dark
 colorscheme dracula
 
 inoremap <silent><expr> <cr> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
+
+lua <<EOF
+require("image_preview").setup({})
+EOF
+
+lua << EOF
+require('Comment').setup()
+EOF
+
+
+lua require("nvim-possession").setup({})
+
+
+
+
+nmap <Leader>sl <cmd>lua require("nvim-possession").list()<CR>
+nmap <Leader>sn <cmd>lua require("nvim-possession").new()<CR>
+nmap <Leader>su <cmd>lua require("nvim-possession").update()<CR>
+
+
+vnoremap   <silent>   ,a    :yank a<CR>
+noremap   <silent>   ,aa    :put a<CR>
+
+vnoremap   <silent>   ,s    :yank s<CR>
+noremap   <silent>   ,ss    :put s<CR>
+
+vnoremap   <silent>   ,q    :yank q<CR>
+noremap   <silent>   ,qq    :put q<CR>
+
+vnoremap   <silent>   ,p    :yank p<CR>
+noremap   <silent>   ,pp    :put p<CR>
+
+
+
+let g:coc_fzf_preview = ''
+let g:coc_fzf_opts = []
+
+
+lua << EOF
+lua require("statuscol").setup({
+  foldfunc = "builtin",
+  setopt = true,
+})
+
+EOF
+
+lua << EOF
+
+vim.o.foldcolumn = '1' -- '0' is not bad
+vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+
+vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+
+local handler = function(virtText, lnum, endLnum, width, truncate)
+    local newVirtText = {}
+    local suffix = ('  %d '):format(endLnum - lnum)
+    local sufWidth = vim.fn.strdisplaywidth(suffix)
+    local targetWidth = width - sufWidth
+    local curWidth = 0
+    for _, chunk in ipairs(virtText) do
+        local chunkText = chunk[1]
+        local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+        if targetWidth > curWidth + chunkWidth then
+            table.insert(newVirtText, chunk)
+        else
+            chunkText = truncate(chunkText, targetWidth - curWidth)
+            local hlGroup = chunk[2]
+            table.insert(newVirtText, {chunkText, hlGroup})
+            chunkWidth = vim.fn.strdisplaywidth(chunkText)
+            -- str width returned from truncate() may less than 2nd argument, need padding
+            if curWidth + chunkWidth < targetWidth then
+                suffix = suffix .. (' '):rep(targetWidth - curWidth - chunkWidth)
+            end
+            break
+        end
+        curWidth = curWidth + chunkWidth
+    end
+    table.insert(newVirtText, {suffix, 'MoreMsg'})
+    return newVirtText
+end
+
+-- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+vim.keymap.set('n', 'B', function()
+    local winid = require('ufo').peekFoldedLinesUnderCursor()
+    if not winid then
+        -- choose one of coc.nvim and nvim lsp
+        vim.fn.CocActionAsync('definitionHover') -- coc.nvim
+        vim.lsp.buf.hover()
+    end
+end)
+
+
+require('ufo').setup({
+  fold_virt_text_handler = handler
+})
+
+EOF
+
