@@ -1,12 +1,17 @@
 set number
 set shell=zsh
-let mapleader = " "  " map leader键设置 
-let g:mapleader = " " 
-set cursorline
 set showmatch
+set cursorline
+let mapleader = " "  " map leader键设置 
 
+augroup matchup_matchparen_highlight
+  autocmd!
+  autocmd ColorScheme * hi MatchParen guifg=red
+augroup END
 
 tnoremap <Esc> <C-\><C-n>
+
+hi! MatchParen ctermbg=blue guibg=red
 
 autocmd FileType scss setl iskeyword+=@-@
 autocmd FileType scss setl iskeyword+=@
@@ -29,12 +34,20 @@ nmap <Leader>b :Buffers<CR>
 
 
 
+
 let g:far#enable_undo=1
 
 nnoremap <C-k> <Up>ddp<Up>
 nnoremap <C-j> ddp
 
 command! -nargs=0 Prettier :CocCommand prettier.forceFormatDocument
+
+function! Sw() range
+    execute a:firstline . "," . a:lastline . 's/^\(.*\)$/\=strdisplaywidth( submatch(0) ) . " " . submatch(0)/'
+    execute a:firstline . "," . a:lastline . 'sort n'
+    execute a:firstline . "," . a:lastline . 's/^\d\+\s//'
+endfunction
+
 "使用 coc.nvim 插件。 
 " 回车补齐。
 inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
@@ -55,6 +68,7 @@ xmap <silent> <C-s> <Plug>(coc-range-select)
 
 
 "search fzf
+nmap <Leader>f :FzfLua<CR>
 nmap <Leader><Leader> <cmd>lua require('fzf-lua').files()<CR>
 nmap <Leader>b <cmd>lua require('fzf-lua').buffers()<CR>
 nmap <Leader>fg <cmd>lua require('fzf-lua').git_status()<CR>
@@ -252,8 +266,8 @@ Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'ctrlpvim/ctrlp.vim'
 Plugin 'HerringtonDarkholme/yats.vim'
 Plugin 'airblade/vim-gitgutter'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+"Plugin 'vim-airline/vim-airline'
+"Plugin 'vim-airline/vim-airline-themes'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-haml'
 Plugin 'JulesWang/css.vim'
@@ -298,6 +312,12 @@ Plugin 'antoinemadec/coc-fzf'
 Plugin 'kevinhwang91/promise-async'
 Plugin 'kevinhwang91/nvim-ufo'
 Plugin  'luukvbaal/statuscol.nvim',
+Plugin 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plugin 'andymass/vim-matchup'
+Plugin 'TimUntersberger/neogit'
+Plugin 'nvim-lualine/lualine.nvim'
+" If you want to have icons in your statusline choose one of these
+Plugin 'kyazdani42/nvim-web-devicons'
 
 
 
@@ -591,7 +611,7 @@ autocmd BufNewFile * normal G
 " Add (Neo)Vim's native statusline support.
 " NOTE: Please see `:h coc-status` for integrations with external plugins that
 " provide custom statusline: lightline.vim, vim-airline.
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+" set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 " Mappings for CoCList
 " Show all diagnostics.
@@ -825,7 +845,7 @@ vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
 
 local handler = function(virtText, lnum, endLnum, width, truncate)
     local newVirtText = {}
-    local suffix = ('  %d '):format(endLnum - lnum)
+    local suffix = ('%d '):format(endLnum - lnum)
     local sufWidth = vim.fn.strdisplaywidth(suffix)
     local targetWidth = width - sufWidth
     local curWidth = 0
@@ -868,5 +888,235 @@ require('ufo').setup({
   fold_virt_text_handler = handler
 })
 
+EOF
+
+
+lua << EOF
+require'nvim-treesitter.configs'.setup {
+  -- A list of parser names, or "all" (the four listed parsers should always be installed)
+  ensure_installed = { "c", "lua", "vim", "help" },
+
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  -- List of parsers to ignore installing (for "all")
+  ignore_install = {  },
+
+  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
+  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+
+
+  highlight = {
+    -- `false` will disable the whole extension
+    enable = true,
+
+    -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
+    -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
+    -- the name of the parser)
+    -- list of language that will be disabled
+    disable = { "c", "rust" },
+    -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
+    disable = function(lang, buf)
+        local max_filesize = 100 * 1024 -- 100 KB
+        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        if ok and stats and stats.size > max_filesize then
+            return true
+        end
+    end,
+
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
+  },
+ matchup = {
+    enable = true,              -- mandatory, false will disable the whole extension
+    -- [options]
+  },
+ rainbow = {
+    enable = true,
+    -- disable = { "jsx", "cpp" }, list of languages you want to disable the plugin for
+    extended_mode = true, -- Also highlight non-bracket delimiters like html tags, boolean or table: lang -> boolean
+    max_file_lines = nil, -- Do not enable for files with more than n lines, int
+    -- colors = {}, -- table of hex strings
+    -- termcolors = {} -- table of colour name strings
+  }
+}
+
+EOF
+
+lua << EOF
+-- Eviline config for lualine
+-- Author: shadmansaleh
+-- Credit: glepnir
+local lualine = require('lualine')
+
+-- Color table for highlights
+-- stylua: ignore
+local colors = {
+  bg       = '#202328',
+  fg       = '#bbc2cf',
+  yellow   = '#ECBE7B',
+  cyan     = '#008080',
+  darkblue = '#081633',
+  green    = '#98be65',
+  orange   = '#FF8800',
+  violet   = '#a9a1e1',
+  magenta  = '#c678dd',
+  blue     = '#51afef',
+  red      = '#ec5f67',
+}
+
+local conditions = {
+  buffer_not_empty = function()
+    return vim.fn.empty(vim.fn.expand('%:t')) ~= 1
+  end,
+  hide_in_width = function()
+    return vim.fn.winwidth(0) > 80
+  end,
+  check_git_workspace = function()
+    local filepath = vim.fn.expand('%:p:h')
+    local gitdir = vim.fn.finddir('.git', filepath .. ';')
+    return gitdir and #gitdir > 0 and #gitdir < #filepath
+  end,
+}
+
+-- Config
+local config = {
+  options = {
+    -- Disable sections and component separators
+    component_separators = '',
+    section_separators = '',
+    theme = {
+      -- We are going to use lualine_c an lualine_x as left and
+      -- right section. Both are highlighted by c theme .  So we
+      -- are just setting default looks o statusline
+      normal = { c = { fg = colors.fg, bg = colors.bg } },
+      inactive = { c = { fg = colors.fg, bg = colors.bg } },
+    },
+  },
+  sections = {
+    -- these are to remove the defaults
+ lualine_a = {
+   {
+      'filename',
+      file_status = true,      -- Displays file status (readonly status, modified status)
+      newfile_status = false,  -- Display new file status (new file means no write after created)
+      path =1 ,                -- 0: Just the filename
+                               -- 1: Relative path
+                               -- 2: Absolute path
+                               -- 3: Absolute path, with tilde as the home directory
+
+      shorting_target = 40,    -- Shortens path to leave 40 spaces in the window
+    }
+
+  },
+  lualine_b = {
+    {
+      'diagnostics',
+
+      -- Table of diagnostic sources, available sources are:
+      --   'nvim_lsp', 'nvim_diagnostic', 'nvim_workspace_diagnostic', 'coc', 'ale', 'vim_lsp'.
+      -- or a function that returns a table as such:
+      --   { error=error_cnt, warn=warn_cnt, info=info_cnt, hint=hint_cnt }
+      sources = { 'nvim_diagnostic', 'coc' },
+
+      -- Displays diagnostics for the defined severity types
+      sections = { 'error', 'warn', 'info', 'hint' },
+
+      diagnostics_color = {
+        -- Same values as the general color option can be used here.
+        error = 'DiagnosticError', -- Changes diagnostics' error color.
+        warn  = 'DiagnosticWarn',  -- Changes diagnostics' warn color.
+        info  = 'DiagnosticInfo',  -- Changes diagnostics' info color.
+        hint  = 'DiagnosticHint',  -- Changes diagnostics' hint color.
+      },
+      symbols = {error = '❌', warn = '⚠️', info = '❕', hint = '🏁'},
+      colored = true,           -- Displays diagnostics status in color if set to true.
+      update_in_insert = false, -- Update diagnostics in insert mode.
+      always_visible = false,   -- Show diagnostics even if there are none.
+    }
+    },
+    lualine_z = {},
+    -- These will be filled later
+    lualine_c = {},
+    lualine_x = {},
+  },
+  inactive_sections = {
+    -- these are to remove the defaults
+    lualine_a = {},
+    lualine_b = {},
+    lualine_y = {},
+    lualine_z = {},
+    lualine_c = {},
+    lualine_x = {},
+  },
+}
+
+-- Inserts a component in lualine_c at left section
+local function ins_left(component)
+  table.insert(config.sections.lualine_c, component)
+end
+
+-- Inserts a component in lualine_x ot right section
+local function ins_right(component)
+  table.insert(config.sections.lualine_x, component)
+end
+
+
+ins_left {
+  -- mode component
+  function()
+    return ''
+  end,
+  color = function()
+    -- auto change color according to neovims mode
+    local mode_color = {
+      n = colors.red,
+      i = colors.green,
+      v = colors.blue,
+      [''] = colors.blue,
+      V = colors.blue,
+      c = colors.magenta,
+      no = colors.red,
+      s = colors.orange,
+      S = colors.orange,
+      [''] = colors.orange,
+      ic = colors.yellow,
+      R = colors.violet,
+      Rv = colors.violet,
+      cv = colors.red,
+      ce = colors.red,
+      r = colors.cyan,
+      rm = colors.cyan,
+      ['r?'] = colors.cyan,
+      ['!'] = colors.red,
+      t = colors.red,
+    }
+    return { fg = mode_color[vim.fn.mode()] }
+  end,
+  padding = { right = 1 },
+}
+
+
+
+ins_right {
+  'branch',
+  color = { fg = colors.violet, gui = 'bold' },
+}
+
+-- Now don't forget to initialize lualine
+lualine.setup(config)
+EOF
+
+
+lua <<  EOF 
+local neogit = require('neogit')
+neogit.setup {}
 EOF
 
