@@ -17,8 +17,71 @@
                 },
                 "rules": [
                     {
+                        "description": "right_option to enter_or_return",
+                        "manipulators": [
+                            {
+
+                                "from": {
+                                    "key_code": "right_option"
+                                },
+                                "to": {
+                                    "key_code": "return_or_enter"
+                                },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "swap left_command to left_option",
+                        "manipulators": [
+                            {
+                               
+                                "from": {
+                                    "key_code": "left_option"
+                                },
+                                "to": {
+                                    "key_code": "left_command"
+                                },
+                                "type": "basic"
+                            },
+                            {
+                              
+                                "from": {
+                                    "key_code": "left_command"
+                                },
+                                "to": {
+                                    "key_code": "left_option"
+                                },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "CAPS LOCK + hjkl to arrow keys and CAPS_LOCK + p to delete",
                         "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "caps_lock pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "semicolon",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
                             {
                                 "conditions": [
                                     {
@@ -340,6 +403,34 @@
                         "is_pointing_device": true,
                         "product_id": 9488,
                         "vendor_id": 2362
+                    },
+                    "ignore": true,
+                    "manipulate_caps_lock_led": false,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "is_pointing_device": false,
+                        "product_id": 4615,
+                        "vendor_id": 6785
+                    },
+                    "ignore": false,
+                    "manipulate_caps_lock_led": true,
+                    "simple_modifications": [],
+                    "treat_as_built_in_keyboard": false
+                },
+                {
+                    "disable_built_in_keyboard_if_exists": false,
+                    "fn_function_keys": [],
+                    "identifiers": {
+                        "is_keyboard": false,
+                        "is_pointing_device": true,
+                        "product_id": 4615,
+                        "vendor_id": 6785
                     },
                     "ignore": true,
                     "manipulate_caps_lock_led": false,
