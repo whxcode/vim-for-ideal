@@ -13,6 +13,14 @@ tnoremap <Esc> <C-\><C-n>
 
 hi! MatchParen ctermbg=blue guibg=red
 
+
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu && mode() != "i" | set rnu   | endif
+  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu                  | set nornu | endif
+augroup END
+
+
 autocmd FileType scss setl iskeyword+=@-@
 autocmd FileType scss setl iskeyword+=@
 autocmd FileType scss setl iskeyword+=$
@@ -28,11 +36,12 @@ set diffopt=internal,filler,closeoff,vertical
 let g:go_debug=['shell-commands'] 
 let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 
-nmap <Leader>ss <Plug>(easymotion-s2)
+map   <silent>   <Leader>]   <cmd>HopLine<CR>
+map   <silent>   <Leader>[  <cmd>HopChar2<CR>
+
+nmap <Leader>ss :HopChar2<CR>
 
 nmap <Leader>b :Buffers<CR>
-
-
 
 
 let g:far#enable_undo=1
@@ -65,6 +74,7 @@ nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
 nmap <silent> <C-s> <Plug>(coc-range-select)
 xmap <silent> <C-s> <Plug>(coc-range-select)
+
 
 
 "search fzf
@@ -283,9 +293,10 @@ Plugin 'ferrine/md-img-paste.vim'
 Plugin 'kovisoft/slimv'
 Plugin 'scrooloose/nerdcommenter'
 Plugin 'jiangmiao/auto-pairs'
-Plugin 'tpope/vim-surround'
+"Plugin 'tpope/vim-surround'
 Plugin 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-Plugin 'easymotion/vim-easymotion'
+"Plugin 'easymotion/vim-easymotion'
+Plugin 'phaazon/hop.nvim'
 Plugin 'maksimr/vim-jsbeautify'
 Plugin 'voldikss/vim-floaterm'
 Plugin 'dinhhuy258/git.nvim'
@@ -293,7 +304,6 @@ Plugin 'neoclide/jsonc.vim'
 Plugin 'nvim-lua/plenary.nvim'
 Plugin 'windwp/nvim-spectre'
 Plugin 'terryma/vim-multiple-cursors'
-Plugin 'gelguy/wilder.nvim', { 'do': function('UpdateRemotePlugins') }
 Plugin 'gennaro-tedesco/nvim-peekup'
 Plugin 'chentoast/marks.nvim'
 Plugin 'nvim-telescope/telescope.nvim',
@@ -314,15 +324,16 @@ Plugin 'kevinhwang91/nvim-ufo'
 Plugin  'luukvbaal/statuscol.nvim',
 Plugin 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plugin 'andymass/vim-matchup'
-Plugin 'TimUntersberger/neogit'
 Plugin 'nvim-lualine/lualine.nvim'
 " If you want to have icons in your statusline choose one of these
 Plugin 'kyazdani42/nvim-web-devicons'
+Plugin 'gelguy/wilder.nvim'
+Plugin 'mizlan/iswap.nvim'
+Plugin 'kylechui/nvim-surround'
 
 
+call vundle#end()  " required
 
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
 "filetype plugin indent on
 set nu
 set ruler
@@ -465,7 +476,7 @@ let g:barbaric_fcitx_cmd = 'fcitx5-remote'
 let g:barbaric_libxkbswitch = $HOME . '/.local/lib/libxkbswitch.so'
 
 
-autocmd BufWritePre *.ts Neoformat
+"autocmd BufWritePre *.ts Neoformat
 
 command! JF :execute '%!python -m json.tool'
   \ | :execute '%!python -c "import re,sys;chr=__builtins__.__dict__.get(\"unichr\", chr);sys.stdout.write(re.sub(r\"\\u[0-9a-f]{4}\", lambda x: chr(int(\"0x\" + x.group(0)[2:], 16)).encode(\"utf-8\"), sys.stdin.read()))"'
@@ -629,40 +640,6 @@ let g:floaterm_keymap_next   = ',n'
 let g:floaterm_keymap_toggle = ',t'
 let g:floaterm_keymap_kill = ',q'
 
-
-call wilder#setup({'modes': [':', '/', '?']})
-
-" 'file_command' : for ripgrep : ['rg', '--files']
-"                : for fd      : ['fd', '-tf']
-" 'dir_command'  : for fd      : ['fd', '-td']
-" 'filters'      : use ['cpsm_filter'] for performance, requires cpsm vim plugin
-"                  found at https://github.com/nixprime/cpsm
-call wilder#set_option('pipeline', [
-      \   wilder#branch(
-      \     wilder#python_file_finder_pipeline({
-      \       'file_command': ['rg', '--files'],
-      \       'dir_command': ['find', '.', '-type', 'd', '-printf', '%P\n'],
-      \       'filters': ['fuzzy_filter', 'difflib_sorter'],
-      \     }),
-      \     wilder#cmdline_pipeline(),
-      \     wilder#python_search_pipeline(),
-      \   ),
-      \ ])
-
-" wilder#popupmenu_border_theme() is optional.
-" 'min_height' : sets the minimum height of the popupmenu
-"              : can also be a number
-" 'max_height' : set to the same as 'min_height' to set the popupmenu to a fixed height
-" 'reverse'    : if 1, shows the candidates from bottom to top
-call wilder#set_option('renderer', wilder#popupmenu_renderer(wilder#popupmenu_border_theme({
-      \ 'highlighter': wilder#basic_highlighter(),
-      \ 'min_width': '30%',
-      \ 'max_width': '40%',
-      \ 'min_height': '30%',
-      \ 'max_height': '40%',
-      \ 'reverse': 10,
-      \ 'pumblend': 50,
-      \ })))
 
 
 lua require('nvim-peekup.config').on_keystroke["paste_reg"] = '+'
@@ -950,6 +927,7 @@ require'nvim-treesitter.configs'.setup {
 
 EOF
 
+
 lua << EOF
 -- Eviline config for lualine
 -- Author: shadmansaleh
@@ -1115,8 +1093,135 @@ lualine.setup(config)
 EOF
 
 
-lua <<  EOF 
-local neogit = require('neogit')
-neogit.setup {}
+
+
+lua << EOF
+local wilder = require('wilder')
+wilder.setup({modes = {':', '/', '?'}})
+
+
+
+wilder.set_option('pipeline', {
+  wilder.branch(
+    wilder.python_file_finder_pipeline({
+      -- to use ripgrep : {'rg', '--files'}
+      -- to use fd      : {'fd', '-tf'}
+      --file_command = {'find', '.', '-type', 'f', '-printf', '%P\n'}, 
+      file_command = {'rg','--files'}, 
+      -- to use fd      : {'fd', '-td'}
+      dir_command = {'find', '.', '-type', 'd', '-printf', '%P\n'},
+      -- use {'cpsm_filter'} for performance, requires cpsm vim plugin
+      -- found at https://github.com/nixprime/cpsm
+      filters = {'fuzzy_filter', 'difflib_sorter'},
+    }),
+    wilder.cmdline_pipeline(),
+    wilder.python_search_pipeline()
+  ),
+
+})
+
+local gradient = {
+  '#f4468f', '#fd4a85', '#ff507a', '#ff566f', '#ff5e63',
+  '#ff6658', '#ff704e', '#ff7a45', '#ff843d', '#ff9036',
+  '#f89b31', '#efa72f', '#e6b32e', '#dcbe30', '#d2c934',
+  '#c8d43a', '#bfde43', '#b6e84e', '#aff05b'
+}
+
+for i, fg in ipairs(gradient) do
+  gradient[i] = wilder.make_hl('WilderGradient' .. i, 'Pmenu', {{a = 1}, {a = 1}, {foreground = fg}})
+end
+
+wilder.set_option('renderer', wilder.popupmenu_renderer({
+  pumblend = 30,
+  left = {' ', wilder.popupmenu_devicons()},
+  right = {' ', wilder.popupmenu_scrollbar()},
+  highlights = {
+    gradient = gradient, -- must be set
+    -- selected_gradient key can be set to apply gradient highlighting for the selected candidate.
+  },
+  highlighter = wilder.highlighter_with_gradient({
+    wilder.basic_highlighter(), -- or wilder.lua_fzy_highlighter(),
+  }),
+}))
+
+
+
+EOF
+
+
+
+lua << EOF
+require'hop'.setup()
+-- place this in one of your configuration file(s)
+local hop = require('hop')
+local directions = require('hop.hint').HintDirection
+vim.keymap.set('', 'f', function()
+  hop.hint_char1({ direction = directions.AFTER_CURSOR, current_line_only = true })
+end, {remap=true})
+vim.keymap.set('', 'F', function()
+   hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = true })
+end, {remap=true})
+
+--vim.keymap.set('', 't', function()
+ -- hop.hint_char2({ direction = directions.AFTER_CURSOR, current_line_only = true })
+--end, {remap=true})
+--vim.keymap.set('', 't', function()
+-- hop.hint_line({ direction = directions.AFTER_CURSOR, current_line_only = true, hint_offset = -1 })
+--end, {remap=true})
+--vim.keymap.set('', 'T', function()
+ -- hop.hint_char1({ direction = directions.BEFORE_CURSOR, current_line_only = true, hint_offset = 1 })
+--end, {remap=true})
+
+EOF
+
+lua << EOF
+require('iswap').setup{
+  -- The keys that will be used as a selection, in order
+  -- ('asdfghjklqwertyuiopzxcvbnm' by default)
+  keys = 'qwertyuiop',
+
+  -- Grey out the rest of the text when making a selection
+  -- (enabled by default)
+  grey = 'disable',
+
+  -- Highlight group for the sniping value (asdf etc.)
+  -- default 'Search'
+  hl_snipe = 'ErrorMsg',
+
+  -- Highlight group for the visual selection of terms
+  -- default 'Visual'
+  hl_selection = 'WarningMsg',
+
+  -- Highlight group for the greyed background
+  -- default 'Comment'
+  hl_grey = 'LineNr',
+
+  -- Post-operation flashing highlight style,
+  -- either 'simultaneous' or 'sequential', or false to disable
+  -- default 'sequential'
+  flash_style = false,
+
+  -- Highlight group for flashing highlight afterward
+  -- default 'IncSearch'
+  hl_flash = 'ModeMsg',
+
+  -- Move cursor to the other element in ISwap*With commands
+  -- default false
+  move_cursor = true,
+
+  -- Automatically swap with only two arguments
+  -- default nil
+  autoswap = true,
+
+  -- Other default options you probably should not change:
+  debug = nil,
+  hl_grey_priority = '1000',
+}
+EOF
+
+lua << EOF
+ require("nvim-surround").setup({
+            -- Configuration here, or leave empty to use defaults
+        })
 EOF
 
