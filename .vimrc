@@ -4,6 +4,28 @@ set showmatch
 set cursorline
 let mapleader = " "  " map leader键设置 
 
+let g:signify_sign_add    = '┃'
+let g:signify_sign_change = '┃'
+let g:signify_sign_delete = '•'
+let g:xcodedark_green_comments = 0
+
+let g:signify_sign_show_count = 0 " Don’t show the number of deleted lines.
+
+augroup vim-colors-xcode
+    autocmd!
+augroup END
+
+autocmd vim-colors-xcode ColorScheme * hi Comment        cterm=italic gui=italic
+autocmd vim-colors-xcode ColorScheme * hi SpecialComment cterm=italic gui=italic
+
+
+
+" Update Git signs every time the text is changed
+autocmd User SignifySetup
+            \ execute 'autocmd! signify' |
+            \ autocmd signify TextChanged,TextChangedI * call sy#start()
+ 
+
 augroup matchup_matchparen_highlight
   autocmd!
   autocmd ColorScheme * hi MatchParen guifg=red
@@ -12,6 +34,11 @@ augroup END
 tnoremap <Esc> <C-\><C-n>
 
 hi! MatchParen ctermbg=blue guibg=red
+
+
+
+command! -nargs=1 Nc :n %:h/<args>
+
 
 
 augroup numbertoggle
@@ -31,8 +58,8 @@ autocmd FileType css setl iskeyword+=$
 autocmd FileType css setl iskeyword+=-
 
 autocmd TermOpen * setlocal nonumber norelativenumber
-set diffopt=internal,filler,closeoff,vertical
 
+set diffopt=internal,filler,closeoff,vertical
 let g:go_debug=['shell-commands'] 
 let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
 
@@ -42,6 +69,10 @@ map   <silent>   <Leader>[  <cmd>HopChar2<CR>
 nmap <Leader>ss :HopChar2<CR>
 
 nmap <Leader>b :Buffers<CR>
+nmap <Leader>t :NvimTreeToggle<CR>
+
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
 
 
 let g:far#enable_undo=1
@@ -74,8 +105,6 @@ nmap <silent> ]e <Plug>(coc-diagnostic-next)
 
 nmap <silent> <C-s> <Plug>(coc-range-select)
 xmap <silent> <C-s> <Plug>(coc-range-select)
-
-
 
 "search fzf
 nmap <Leader>f :FzfLua<CR>
@@ -213,11 +242,11 @@ func! CompileRunGcc()
         exec "!ts-node *.ts -o %<"
         exec "!time ./%<"
     elseif &filetype == 'c'
-        exec "!g++ *.c -o %<"
+        exec "!gcc *.c -o %<"
         exec "!time ./%<"
     elseif &filetype == 'cpp'
-        exec "!g++ % -o %<"
-        exec "!time ./%<"
+        exec "!g++  % -o %<.out"
+        exec "!time ./%<.out && rm -rf %<.out"
     elseif &filetype == 'java'
         exec "!javac %"
         exec "!time java %<"
@@ -242,7 +271,10 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'Mofiqul/dracula.nvim'
-Plugin 'scrooloose/nerdtree'
+"Plugin 'scrooloose/nerdtree'
+"
+"
+Plugin 'nvim-tree/nvim-tree.lua'
 Plugin 'scrooloose/syntastic'
 Plugin 'terryma/vim-multiple-cursors'
 Plugin 'eslint/eslint'
@@ -303,7 +335,7 @@ Plugin 'dinhhuy258/git.nvim'
 Plugin 'neoclide/jsonc.vim'
 Plugin 'nvim-lua/plenary.nvim'
 Plugin 'windwp/nvim-spectre'
-Plugin 'terryma/vim-multiple-cursors'
+"Plugin 'terryma/vim-multiple-cursors'
 Plugin 'gennaro-tedesco/nvim-peekup'
 Plugin 'chentoast/marks.nvim'
 Plugin 'nvim-telescope/telescope.nvim',
@@ -330,7 +362,18 @@ Plugin 'kyazdani42/nvim-web-devicons'
 Plugin 'gelguy/wilder.nvim'
 Plugin 'mizlan/iswap.nvim'
 Plugin 'kylechui/nvim-surround'
-
+Plugin 'rest-nvim/rest.nvim'
+Plugin 'arzg/vim-colors-xcode'
+Plugin 'mg979/vim-visual-multi', {'branch': 'master'}
+Plugin 'gen740/SmoothCursor.nvim'
+Plugin 'cpea2506/one_monokai.nvim'
+Plugin 'nvim-treesitter/nvim-treesitter-context'
+Plugin 'neovim/nvim-lspconfig'
+Plugin  'SmiteshP/nvim-navic'
+Plugin 'MunifTanjim/nui.nvim'
+Plugin 'numToStr/Comment.nvim'
+Plugin 'nvim-telescope/telescope.nvim'
+Plugin 'SmiteshP/nvim-navbuddy'
 
 call vundle#end()  " required
 
@@ -761,8 +804,12 @@ map <leader>t<leader> :tabnext<cr>
 map <leader>tc :tabclose<cr>
 map <leader>to :tabonly<cr>r
 
-set background=dark
-colorscheme dracula
+"
+"
+"set background=dark
+"set termguicolors
+"colorscheme xcodedarkhc
+"'colorscheme xcodedarkhc
 
 inoremap <silent><expr> <cr> coc#pum#visible() ? coc#_select_confirm() : "\<C-g>u\<CR>"
 
@@ -804,49 +851,62 @@ let g:coc_fzf_opts = []
 
 
 lua << EOF
-lua require("statuscol").setup({
-  foldfunc = "builtin",
-  setopt = true,
-})
+ local builtin = require("statuscol.builtin")
+ require("statuscol").setup(
+ {
+     relculright = true,
+     segments = {
+       {text = {builtin.foldfunc}, click = "v:lua.ScFa"},
+       {text = {"%s"}, click = "v:lua.ScSa"},
+       {text = {builtin.lnumfunc, " "}, click = "v:lua.ScLa"}
+     }
+     }
+ )
 
 EOF
 
 lua << EOF
 
-vim.o.foldcolumn = '1' -- '0' is not bad
 vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
 vim.o.foldlevelstart = 99
 vim.o.foldenable = true
 
 vim.o.fillchars = [[eob: ,fold: ,foldopen:,foldsep: ,foldclose:]]
+vim.o.foldcolumn = '1'
 
 local handler = function(virtText, lnum, endLnum, width, truncate)
-    local newVirtText = {}
-    local suffix = ('%d '):format(endLnum - lnum)
-    local sufWidth = vim.fn.strdisplaywidth(suffix)
-    local targetWidth = width - sufWidth
-    local curWidth = 0
-    for _, chunk in ipairs(virtText) do
-        local chunkText = chunk[1]
-        local chunkWidth = vim.fn.strdisplaywidth(chunkText)
-        if targetWidth > curWidth + chunkWidth then
-            table.insert(newVirtText, chunk)
-        else
-            chunkText = truncate(chunkText, targetWidth - curWidth)
-            local hlGroup = chunk[2]
-            table.insert(newVirtText, {chunkText, hlGroup})
-            chunkWidth = vim.fn.strdisplaywidth(chunkText)
-            -- str width returned from truncate() may less than 2nd argument, need padding
-            if curWidth + chunkWidth < targetWidth then
-                suffix = suffix .. (' '):rep(targetWidth - curWidth - chunkWidth)
-            end
-            break
-        end
-        curWidth = curWidth + chunkWidth
-    end
-    table.insert(newVirtText, {suffix, 'MoreMsg'})
-    return newVirtText
-end
+local newVirtText = {}
+local totalLines = vim.api.nvim_buf_line_count(0)
+local foldedLines = endLnum - lnum
+local suffix = ("  %d"):format(foldedLines )
+local sufWidth = vim.fn.strdisplaywidth(suffix)
+local targetWidth = width - sufWidth
+local curWidth = 0
+for _, chunk in ipairs(virtText) do
+  local chunkText = chunk[1]
+  local chunkWidth = vim.fn.strdisplaywidth(chunkText)
+  if targetWidth > curWidth + chunkWidth then
+    table.insert(newVirtText, chunk)
+  else
+    chunkText = truncate(chunkText, targetWidth - curWidth)
+    local hlGroup = chunk[2]
+    table.insert(newVirtText, { chunkText, hlGroup })
+    chunkWidth = vim.fn.strdisplaywidth(chunkText)
+    -- str width returned from truncate() may less than 2nd argument, need padding
+    if curWidth + chunkWidth < targetWidth then
+      suffix = suffix .. (" "):rep(targetWidth - curWidth - chunkWidth)
+      end
+      break
+      end
+      curWidth = curWidth + chunkWidth
+      end
+      local rAlignAppndx =
+      math.max(math.min(vim.opt.textwidth["_value"], width - 1) - curWidth - sufWidth, 0)
+      suffix = (" "):rep(rAlignAppndx) .. suffix
+      table.insert(newVirtText, { suffix, "MoreMsg" })
+      return newVirtText
+      end
+
 
 -- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
 vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
@@ -862,7 +922,25 @@ end)
 
 
 require('ufo').setup({
-  fold_virt_text_handler = handler
+  fold_virt_text_handler = handler,
+ open_fold_hl_timeout = 400,
+    close_fold_kinds = { "imports", "comment" },
+    preview = {
+      win_config = {
+        border = { "", "─", "", "", "", "─", "", "" },
+        -- winhighlight = "Normal:Folded",
+        winblend = 0,
+      },
+      mappings = {
+        scrollU = "<C-u>",
+        scrollD = "<C-d>",
+        jumpTop = "[",
+        jumpBot = "]",
+      },
+    },
+    provider_selector = function(bufnr, filetype, buftype)
+      return {"treesitter", "indent"}
+    end
 })
 
 EOF
@@ -922,13 +1000,194 @@ require'nvim-treesitter.configs'.setup {
     max_file_lines = nil, -- Do not enable for files with more than n lines, int
     -- colors = {}, -- table of hex strings
     -- termcolors = {} -- table of colour name strings
-  }
+  },
+  incremental_selection = { enable = true, keymaps = { init_selection = '<CR>', node_incremental = '<CR>', node_decremental = '<BS>', scope_incremental = '<TAB>' } },
+  indent = { enable = true }
 }
 
 EOF
 
 
 lua << EOF
+local navic = require("nvim-navic")
+local navbuddy = require("nvim-navbuddy")
+local actions = require("nvim-navbuddy.actions")
+
+require("lspconfig").tsserver.setup({
+    -- Other settings here
+    -- on_attach = function(client, bufnr) require("nvim-navic").attach(client, bufnr) end
+  on_attach = function(client, bufnr)
+        navbuddy.attach(client, bufnr)
+        navic.attach(client, bufnr)
+    end,
+  window = {
+        border = "single",  -- "rounded", "double", "solid", "none"
+                            -- or an array with eight chars building up the border in a clockwise fashion
+                            -- starting with the top-left corner. eg: { "╔", "═" ,"╗", "║", "╝", "═", "╚", "║" }.
+        size = "60%",       -- Or table format example: { height = "40%", width = "100%"}
+        position = "50%",   -- Or table format example: { row = "100%", col = "0%"}
+        scrolloff = nil,    -- scrolloff value within navbuddy window
+        sections = {
+            left = {
+                size = "20%",
+                border = nil, -- You can set border style for each section individually as well.
+            },
+            mid = {
+                size = "40%",
+                border = nil,
+            },
+            right = {
+                -- No size option for right most section. It fills to
+                -- remaining area.
+                border = nil,
+                preview = "leaf",  -- Right section can show previews too.
+                                   -- Options: "leaf", "always" or "never"
+            }
+        },
+    },
+    node_markers = {
+        enabled = true,
+        icons = {
+            leaf = "  ",
+            leaf_selected = " → ",
+            branch = " ",
+        },
+    },
+    icons = {
+        File          = "󰈙 ",
+        Module        = " ",
+        Namespace     = "󰌗 ",
+        Package       = " ",
+        Class         = "󰌗 ",
+        Method        = "󰆧 ",
+        Property      = " ",
+        Field         = " ",
+        Constructor   = " ",
+        Enum          = "󰕘",
+        Interface     = "󰕘",
+        Function      = "󰊕 ",
+        Variable      = "󰆧 ",
+        Constant      = "󰏿 ",
+        String        = " ",
+        Number        = "󰎠 ",
+        Boolean       = "◩ ",
+        Array         = "󰅪 ",
+        Object        = "󰅩 ",
+        Key           = "󰌋 ",
+        Null          = "󰟢 ",
+        EnumMember    = " ",
+        Struct        = "󰌗 ",
+        Event         = " ",
+        Operator      = "󰆕 ",
+        TypeParameter = "󰊄 ",
+    },
+    use_default_mappings = true,            -- If set to false, only mappings set
+                                            -- by user are set. Else default
+                                            -- mappings are used for keys
+                                            -- that are not set by user
+    mappings = {
+        ["<esc>"] = actions.close(),        -- Close and cursor to original location
+        ["q"] = actions.close(),
+
+        ["j"] = actions.next_sibling(),     -- down
+        ["k"] = actions.previous_sibling(), -- up
+
+        ["h"] = actions.parent(),           -- Move to left panel
+        ["l"] = actions.children(),         -- Move to right panel
+        ["0"] = actions.root(),             -- Move to first panel
+
+        ["v"] = actions.visual_name(),      -- Visual selection of name
+        ["V"] = actions.visual_scope(),     -- Visual selection of scope
+
+        ["y"] = actions.yank_name(),        -- Yank the name to system clipboard "+
+        ["Y"] = actions.yank_scope(),       -- Yank the scope to system clipboard "+
+
+        ["i"] = actions.insert_name(),      -- Insert at start of name
+        ["I"] = actions.insert_scope(),     -- Insert at start of scope
+
+        ["a"] = actions.append_name(),      -- Insert at end of name
+        ["A"] = actions.append_scope(),     -- Insert at end of scope
+
+        ["r"] = actions.rename(),           -- Rename currently focused symbol
+
+        ["d"] = actions.delete(),           -- Delete scope
+
+        ["f"] = actions.fold_create(),      -- Create fold of current scope
+        ["F"] = actions.fold_delete(),      -- Delete fold of current scope
+
+        ["c"] = actions.comment(),          -- Comment out current scope
+
+        ["<enter>"] = actions.select(),     -- Goto selected symbol
+        ["o"] = actions.select(),
+
+        ["J"] = actions.move_down(),        -- Move focused node down
+        ["K"] = actions.move_up(),          -- Move focused node up
+
+        ["t"] = actions.telescope({         -- Fuzzy finder at current level.
+            layout_config = {               -- All options that can be
+                height = 0.60,              -- passed to telescope.nvim's
+                width = 0.60,               -- default can be passed here.
+                prompt_position = "top",
+                preview_width = 0.50
+            },
+            layout_strategy = "horizontal"
+        }),
+
+        ["g?"] = actions.help(),            -- Open mappings help window
+    },
+    lsp = {
+        auto_attach = false,   -- If set to true, you don't need to manually use attach function
+        preference = nil,      -- list of lsp server names in order of preference
+    },
+    source_buffer = {
+        follow_node = true,    -- Keep the current node in focus on the source buffer
+        highlight = true,      -- Highlight the currently focused node
+        reorient = "smart",    -- "smart", "top", "mid" or "none"
+        scrolloff = nil        -- scrolloff value when navbuddy is open
+    }
+
+})
+
+navic.setup {
+  icons = {
+        File          = "",
+        Module        = "",
+        Namespace     = "",
+        Package       = "",
+        Class         = "",
+        Method        = "",
+        Property      = "",
+        Field         = "",
+        Constructor   = "",
+        Enum          = "",
+        Interface     = "",
+        Function      = "",
+        Variable      = "",
+        Constant      = "",
+        String        = "",
+        Number        = "",
+        Boolean       = "",
+        Array         = "",
+        Object        = "",
+        Key           = "",
+        Null          = "",
+        EnumMember    = "",
+        Struct        = "",
+        Event         = "",
+        Operator      = "",
+        TypeParameter = "",
+  },
+}
+
+
+
+
+require("lspconfig").clangd.setup {
+    on_attach = function(client, bufnr)
+        navic.attach(client, bufnr)
+    end
+}
+
 -- Eviline config for lualine
 -- Author: shadmansaleh
 -- Credit: glepnir
@@ -986,10 +1245,6 @@ local config = {
       file_status = true,      -- Displays file status (readonly status, modified status)
       newfile_status = false,  -- Display new file status (new file means no write after created)
       path =1 ,                -- 0: Just the filename
-                               -- 1: Relative path
-                               -- 2: Absolute path
-                               -- 3: Absolute path, with tilde as the home directory
-
       shorting_target = 40,    -- Shortens path to leave 40 spaces in the window
     }
 
@@ -1020,10 +1275,19 @@ local config = {
       always_visible = false,   -- Show diagnostics even if there are none.
     }
     },
-    lualine_z = {},
+   lualine_c = {
+            {
+              function()
+                  return navic.get_location()
+              end,
+              cond = function()
+                  return navic.is_available()
+              end
+            },
+        },
     -- These will be filled later
-    lualine_c = {},
-    lualine_x = {},
+    lualine_x={},
+
   },
   inactive_sections = {
     -- these are to remove the defaults
@@ -1033,54 +1297,14 @@ local config = {
     lualine_z = {},
     lualine_c = {},
     lualine_x = {},
-  },
+  }
 }
 
--- Inserts a component in lualine_c at left section
-local function ins_left(component)
-  table.insert(config.sections.lualine_c, component)
-end
 
 -- Inserts a component in lualine_x ot right section
 local function ins_right(component)
   table.insert(config.sections.lualine_x, component)
 end
-
-
-ins_left {
-  -- mode component
-  function()
-    return ''
-  end,
-  color = function()
-    -- auto change color according to neovims mode
-    local mode_color = {
-      n = colors.red,
-      i = colors.green,
-      v = colors.blue,
-      [''] = colors.blue,
-      V = colors.blue,
-      c = colors.magenta,
-      no = colors.red,
-      s = colors.orange,
-      S = colors.orange,
-      [''] = colors.orange,
-      ic = colors.yellow,
-      R = colors.violet,
-      Rv = colors.violet,
-      cv = colors.red,
-      ce = colors.red,
-      r = colors.cyan,
-      rm = colors.cyan,
-      ['r?'] = colors.cyan,
-      ['!'] = colors.red,
-      t = colors.red,
-    }
-    return { fg = mode_color[vim.fn.mode()] }
-  end,
-  padding = { right = 1 },
-}
-
 
 
 ins_right {
@@ -1089,7 +1313,12 @@ ins_right {
 }
 
 -- Now don't forget to initialize lualine
+-- vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}" 
+
+
 lualine.setup(config)
+
+
 EOF
 
 
@@ -1132,7 +1361,7 @@ for i, fg in ipairs(gradient) do
 end
 
 wilder.set_option('renderer', wilder.popupmenu_renderer({
-  pumblend = 30,
+  pumblend = 0,
   left = {' ', wilder.popupmenu_devicons()},
   right = {' ', wilder.popupmenu_scrollbar()},
   highlights = {
@@ -1224,4 +1453,125 @@ lua << EOF
             -- Configuration here, or leave empty to use defaults
         })
 EOF
+
+lua << EOF
+  require("rest-nvim").setup({
+      -- Open request results in a horizontal split
+      result_split_horizontal = false,
+      -- Keep the http file buffer above|left when split horizontal|vertical
+      result_split_in_place = false,
+      -- Skip SSL verification, useful for unknown certificates
+      skip_ssl_verification = false,
+      -- Encode URL before making request
+      encode_url = true,
+      -- Highlight request on run
+      highlight = {
+        enabled = true,
+        timeout = 150,
+      },
+      result = {
+        -- toggle showing URL, HTTP info, headers at top the of result window
+        show_url = true,
+        show_http_info = true,
+        show_headers = true,
+        -- executables or functions for formatting response body [optional]
+        -- set them to false if you want to disable them
+        formatters = {
+          json = "jq",
+          html = function(body)
+            return vim.fn.system({"tidy", "-i", "-q", "-"}, body)
+          end
+        },
+      },
+      -- Jump to request line on run
+      jump_to_request = false,
+      env_file = '.env',
+      custom_dynamic_variables = {},
+      yank_dry_run = true,
+    })
+EOF
+
+
+lua << EOF
+local api = require('nvim-tree.api')
+
+require("nvim-tree").setup({
+  sort_by = "case_sensitive",
+  view = {
+    width = 30,
+  },
+  renderer = {
+    group_empty = true,
+  },
+  filters = {
+    dotfiles = true,
+  },
+})
+
+
+EOF
+
+lua << EOF
+require('smoothcursor').setup({
+  cursor = "⭕️",
+})
+
+
+local dracula = require("dracula")
+dracula.setup({
+  -- customize dracula color palette
+  -- show the '~' characters after the end of buffers
+  show_end_of_buffer = true, -- default false
+  -- use transparent background
+  transparent_bg = false, -- default false
+  -- set custom lualine background color
+  lualine_bg_color = "#44475a", -- default nil
+  -- set italic comment
+  italic_comment = true, -- default false
+  -- overrides the default highlights with table see `:h synIDattr`
+  overrides = {},
+  -- You can use overrides as table like this
+  -- overrides = {
+  --   NonText = { fg = "white" }, -- set NonText fg to white
+  --   NvimTreeIndentMarker = { link = "NonText" }, -- link to NonText highlight
+  --   Nothing = {} -- clear highlight of Nothing
+  -- },
+  -- Or you can also use it like a function to get color from theme
+  -- overrides = function (colors)
+  --   return {
+  --     NonText = { fg = colors.white }, -- set NonText fg to white of theme
+  --   }
+  -- end,
+})
+
+theme = 'dracula-soft'
+
+
+EOF
+
+lua << EOF
+require'treesitter-context'.setup{
+  enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+  max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+  min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+  line_numbers = true,
+  multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
+  trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+  mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
+  -- Separator between context and content. Should be a single character string, like '-'.
+  -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+  separator = nil,
+  zindex = 20, -- The Z-index of the context window
+  on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
+}
+
+vim.keymap.set("n", "[c", function() require("treesitter-context").go_to_context() end, { silent = true })
+
+
+
+EOF
+
+
+colorscheme dracula
+
 
