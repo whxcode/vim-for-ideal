@@ -4,12 +4,17 @@ set showmatch
 set cursorline
 let mapleader = " "  " map leader键设置 
 
+"dog
+
+au! FileType bito set syntax=java
+
 let g:signify_sign_add    = '┃'
 let g:signify_sign_change = '┃'
 let g:signify_sign_delete = '•'
 let g:xcodedark_green_comments = 0
 
 let g:signify_sign_show_count = 0 " Don’t show the number of deleted lines.
+
 
 augroup vim-colors-xcode
     autocmd!
@@ -67,6 +72,9 @@ map   <silent>   <Leader>]   <cmd>HopLine<CR>
 map   <silent>   <Leader>[  <cmd>HopChar2<CR>
 
 nmap <Leader>ss :HopChar2<CR>
+
+nmap ,g :ChatGPT<CR>
+nmap ,gi :ChatGPTEditWithInstructions<CR>
 
 nmap <Leader>b :Buffers<CR>
 nmap <Leader>t :NvimTreeToggle<CR>
@@ -367,13 +375,23 @@ Plugin 'arzg/vim-colors-xcode'
 Plugin 'mg979/vim-visual-multi', {'branch': 'master'}
 Plugin 'gen740/SmoothCursor.nvim'
 Plugin 'cpea2506/one_monokai.nvim'
-Plugin 'nvim-treesitter/nvim-treesitter-context'
+"Plugin 'nvim-treesitter/nvim-treesitter-context'
 Plugin 'neovim/nvim-lspconfig'
 Plugin  'SmiteshP/nvim-navic'
 Plugin 'MunifTanjim/nui.nvim'
 Plugin 'numToStr/Comment.nvim'
 Plugin 'nvim-telescope/telescope.nvim'
 Plugin 'SmiteshP/nvim-navbuddy'
+Plugin 'folke/tokyonight.nvim'
+Plugin 'rebelot/kanagawa.nvim'
+Plugin 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plugin 'NLKNguyen/papercolor-theme'
+Plugin 'Civitasv/cmake-tools.nvim'
+Plugin 'zhenyangze/vim-bitoai'
+Plugin 'voldikss/vim-translator'
+Plugin  'jackMort/ChatGPT.nvim'
+Plugin  'debugloop/telescope-undo.nvim'
+
 
 call vundle#end()  " required
 
@@ -1008,10 +1026,40 @@ require'nvim-treesitter.configs'.setup {
 EOF
 
 
+
 lua << EOF
 local navic = require("nvim-navic")
 local navbuddy = require("nvim-navbuddy")
 local actions = require("nvim-navbuddy.actions")
+
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics, {
+  underline = true,
+  update_in_insert = false,
+  virtual_text = { spacing = 4, prefix = "●" },
+  severity_sort = true,
+})
+
+-- Show line diagnostics automatically in hover window
+vim.o.updatetime = 250
+vim.cmd [[autocmd! CursorHold,CursorHoldI * lua vim.diagnostic.open_float(nil, {focus=false})]]
+
+-- Diagnostic symbols in the sign column (gutter)
+local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+for type, icon in pairs(signs) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+end
+
+vim.diagnostic.config({
+  virtual_text = {
+    prefix = '●'
+  },
+  update_in_insert = true,
+  float = {
+    source = "always", -- Or "if_many"
+  },
+})
 
 require("lspconfig").tsserver.setup({
     -- Other settings here
@@ -1020,6 +1068,8 @@ require("lspconfig").tsserver.setup({
         navbuddy.attach(client, bufnr)
         navic.attach(client, bufnr)
     end,
+
+
   window = {
         border = "single",  -- "rounded", "double", "solid", "none"
                             -- or an array with eight chars building up the border in a clockwise fashion
@@ -1545,33 +1595,110 @@ dracula.setup({
 })
 
 theme = 'dracula-soft'
+EOF
 
+lua << EOF
+require("cmake-tools").setup {
+  cmake_command = "cmake", -- this is used to specify cmake command path
+  cmake_regenerate_on_save = true, -- auto generate when save CMakeLists.txt
+  cmake_generate_options = { "-DCMAKE_EXPORT_COMPILE_COMMANDS=1" }, -- this will be passed when invoke `CMakeGenerate`
+  cmake_build_options = {}, -- this will be passed when invoke `CMakeBuild`
+  cmake_build_directory = "", -- this is used to specify generate directory for cmake
+  cmake_build_directory_prefix = "cmake_build_", -- when cmake_build_directory is set to "", this option will be activated
+  cmake_soft_link_compile_commands = true, -- this will automatically make a soft link from compile commands file to project root dir
+  cmake_compile_commands_from_lsp = false, -- this will automatically set compile commands file location using lsp, to use it, please set `cmake_soft_link_compile_commands` to false
+  cmake_kits_path = nil, -- this is used to specify global cmake kits path, see CMakeKits for detailed usage
+  cmake_variants_message = {
+    short = { show = true }, -- whether to show short message
+    long = { show = true, max_length = 40 } -- whether to show long message
+  },
+  cmake_dap_configuration = { -- debug settings for cmake
+    name = "cpp",
+    type = "codelldb",
+    request = "launch",
+    stopOnEntry = false,
+    runInTerminal = true,
+    console = "integratedTerminal",
+  },
+  cmake_always_use_terminal = false, -- if true, use terminal for generate, build, clean, install, run, etc, except for debug, else only use terminal for run, use quickfix for others
+  cmake_quickfix_opts = { -- quickfix settings for cmake, quickfix will be used when `cmake_always_use_terminal` is false
+    show = "always", -- "always", "only_on_error"
+    position = "belowright", -- "bottom", "top"
+    size = 10,
+  },
+  cmake_terminal_opts = { -- terminal settings for cmake, terminal will be used for run when `cmake_always_use_terminal` is false or true, will be used for all tasks except for debug when `cmake_always_use_terminal` is true
+    name = "Main Terminal",
+    prefix_name = "[CMakeTools]: ", -- This must be included and must be unique, otherwise the terminals will not work. Do not use a simple spacebar " ", or any generic name
+    split_direction = "horizontal", -- "horizontal", "vertical"
+    split_size = 11,
+
+    -- Window handling
+    single_terminal_per_instance = true, -- Single viewport, multiple windows
+    single_terminal_per_tab = true, -- Single viewport per tab
+    keep_terminal_static_location = true, -- Static location of the viewport if avialable
+
+    -- Running Tasks
+    start_insert_in_launch_task = false, -- If you want to enter terminal with :startinsert upon using :CMakeRun
+    start_insert_in_other_tasks = false, -- If you want to enter terminal with :startinsert upon launching all other cmake tasks in the terminal. Generally set as false
+    focus_on_main_terminal = false, -- Focus on cmake terminal when cmake task is launched. Only used if cmake_always_use_terminal is true.
+    focus_on_launch_terminal = false, -- Focus on cmake launch terminal when executable target in launched.
+  }
+}
 
 EOF
 
 lua << EOF
-require'treesitter-context'.setup{
-  enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-  max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-  min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-  line_numbers = true,
-  multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
-  trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-  mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
-  -- Separator between context and content. Should be a single character string, like '-'.
-  -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-  separator = nil,
-  zindex = 20, -- The Z-index of the context window
-  on_attach = nil, -- (fun(buf: integer): boolean) return false to disable attaching
-}
+local home = vim.fn.expand("$HOME")
+require("chatgpt").setup({
+    --api_key_cmd = "op read op://private/OpenAI/credential --no-newline"
+  api_key_cmd = "gpg --decrypt " .. home .. "/secret.txt.gpg",
+  popup_input = {
+      prompt = "  ",
+      border = {
+        highlight = "FloatBorder",
+        style = "rounded",
+        text = {
+          top_align = "center",
+          top = " Prompt ",
+        },
+      },
+      win_options = {
+        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+      },
+      submit = "<CR>",
+      submit_n = "<CR>",
+    },
 
-vim.keymap.set("n", "[c", function() require("treesitter-context").go_to_context() end, { silent = true })
 
+})
 
+ require("telescope").setup({
+extensions = {
+    undo = {
+      use_delta = true,
+      use_custom_command = nil, -- setting this implies `use_delta = false`. Accepted format is: { "bash", "-c", "echo '$DIFF' | delta" }
+      side_by_side = false,
+      diff_context_lines = vim.o.scrolloff,
+      entry_format = "state #$ID, $STAT, $TIME",
+      time_format = "",
+      mappings = {
+        i = {
+          -- IMPORTANT: Note that telescope-undo must be available when telescope is configured if
+          -- you want to replicate these defaults and use the following actions. This means
+          -- installing as a dependency of telescope in it's `requirements` and loading this
+          -- extension from there instead of having the separate plugin definition as outlined
+          -- above.
+          ["y"] = require("telescope-undo.actions").yank_additions,
+          ["d"] = require("telescope-undo.actions").yank_deletions,
+          ["r"] = require("telescope-undo.actions").restore,
+        },
+      },
+    },
+  },
+    })
+
+  require("telescope").load_extension("undo")
 
 EOF
 
-
-colorscheme dracula
-
-
+colorscheme tokyonight
