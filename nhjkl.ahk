@@ -3,7 +3,7 @@ SetCapsLockState, AlwaysOff  ; 强制保持 CapsLock 关闭状态
 CapsLock::Return  ; 彻底屏蔽 CapsLock 的默认功能
 
 ;交换 lctrl与lalt
-LWin::LCtrl
+LAlt::LCtrl
 LCtrl::LAlt
 
 ;hjkl->左下上右移动
@@ -33,5 +33,5 @@ Send {Backspace}
 return
 
 ;桌面映射快捷键
-^!h::Send ^#{Left}   ; Ctrl+Alt+H → 向左切换桌面 (Ctrl+Win+Left)
-^!l::Send ^#{Right}  ; Ctrl+Alt+L → 向右切换桌面 (Ctrl+Win+Right)
+^!h::Send ^#{Left}
+^!l::Send ^#{Right}
