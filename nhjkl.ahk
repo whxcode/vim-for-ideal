@@ -49,3 +49,6 @@ CapsLock & 9::Send {F9}
 CapsLock & 0::Send {F10}
 CapsLock & -::Send {F11}   ; CapsLock + - = F11
 CapsLock & =::Send {F12}   ; CapsLock + = = F12
+
+; 按下 CapsLock + Esc 输入反引号 `
+CapsLock & Esc::Send ``  ; 注意：这里用两个 ` 转义，实际发送一个 `
